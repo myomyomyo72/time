@@ -1,71 +1,221 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JR時刻案内アプリ</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>関西電車時刻表</title>
+  <style>
+    /* ------- 共通リセット ------- */
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+      background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      min-height:100vh; padding:10px;
+    }
+    /* ------- レイアウト ------- */
+    .container{
+      max-width:800px; margin:0 auto; background:rgba(255,255,255,.95);
+      border-radius:20px; padding:20px; box-shadow:0 20px 40px rgba(0,0,0,.1);
+      backdrop-filter:blur(10px);
+    }
+    h1{ text-align:center; color:#333; margin-bottom:20px; font-size:24px; font-weight:700; }
+    .current-time{
+      text-align:center; font-size:18px; color:#666; margin-bottom:20px;
+      padding:10px; background:rgba(102,126,234,.1); border-radius:10px;
+    }
+    .route-section{ margin-bottom:25px; border:2px solid #e0e0e0; border-radius:15px; overflow:hidden; }
+    .route-header{
+      background:linear-gradient(90deg,#667eea,#764ba2); color:#fff;
+      padding:15px; font-weight:bold; text-align:center; font-size:16px;
+    }
+    .timetable-container{ display:grid; grid-template-columns:1fr 1fr; gap:15px; padding:15px; }
+    .timetable-section{
+      background:#f8f9fa; border-radius:10px; padding:15px;
+      box-shadow:0 2px 8px rgba(0,0,0,.05);
+    }
+    .section-title{
+      font-weight:bold; margin-bottom:10px; color:#333; font-size:14px;
+      border-bottom:2px solid #667eea; padding-bottom:5px;
+    }
+    .time-item{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:8px 12px; margin:5px 0; background:#fff; border-radius:8px;
+      border-left:4px solid #667eea; box-shadow:0 1px 3px rgba(0,0,0,.1);
+      transition:.2s;
+    }
+    .time-item:hover{ transform:translateY(-1px); box-shadow:0 2px 6px rgba(0,0,0,.15); }
+    .time{ font-weight:bold; color:#333; font-size:16px; }
+    .train-type{
+      background:#667eea; color:#fff; padding:2px 6px; border-radius:4px;
+      font-size:11px; font-weight:bold;
+    }
+    .train-type.express{ background:#e74c3c; }
+    .train-type.rapid{   background:#f39c12; }
+    .train-type.local{   background:#27ae60; }
+    .error{
+      text-align:center; padding:20px; color:#e74c3c; background:#fff5f5;
+      border-radius:8px; margin:10px 0;
+    }
+    .refresh-btn{
+      background:linear-gradient(45deg,#667eea,#764ba2); color:#fff; border:none;
+      padding:12px 24px; border-radius:25px; font-size:16px; font-weight:bold;
+      cursor:pointer; display:block; margin:20px auto; transition:.3s;
+      box-shadow:0 4px 15px rgba(102,126,234,.4);
+    }
+    .refresh-btn:hover{ transform:translateY(-2px); box-shadow:0 6px 20px rgba(102,126,234,.6); }
+    @media(max-width:600px){
+      .timetable-container{ grid-template-columns:1fr; }
+      .container{ padding:15px; margin:5px; }
+      h1{ font-size:20px; }
+    }
+  </style>
 </head>
+
 <body>
-    <header>
-        <h1>JR時刻案内アプリ</h1>
-        <nav class="tabs">
-            <button class="tab active" data-tab="nishioji_osaka">西大路 → 大阪</button>
-            <button class="tab" data-tab="osaka_nishioji">大阪 → 西大路</button>
-        </nav>
-    </header>
-    <main>
-        <section id="nishioji_osaka" class="tab-content active">
-            <h2>西大路 → 大阪</h2>
-            <div id="nishioji_osaka_results">
-                <p>現在時刻から近い大阪方面の電車</p>
-                <div id="nishioji_osaka_direct_results">
-                    <h3>西大路から直通</h3>
-                    <ul class="train-list"></ul>
-                </div>
-                <div id="nishioji_osaka_via_kyoto_results">
-                    <h3>西大路 → 京都 (乗り換え) → 大阪</h3>
-                    <ul class="train-list"></ul>
-                </div>
-            </div>
-        </section>
+  <div class="container">
+    <h1>🚃 関西電車時刻表</h1>
+    <div id="currentTime" class="current-time"></div>
 
-        <section id="osaka_nishioji" class="tab-content">
-            <h2>大阪 → 西大路</h2>
-            <div id="osaka_nishioji_results">
-                <p>現在時刻から近い西大路方面の電車</p>
-                <div id="osaka_nishioji_direct_results">
-                    <h3>大阪から直通</h3>
-                    <ul class="train-list"></ul>
-                </div>
-                <div id="osaka_nishioji_via_kyoto_results">
-                    <h3>大阪 → 京都 (乗り換え) → 西大路</h3>
-                    <ul class="train-list"></ul>
-                </div>
-            </div>
-        </section>
+    <!-- 西大路 → 大阪 -->
+    <div class="route-section">
+      <div class="route-header">西大路駅 → 大阪駅</div>
+      <div class="timetable-container">
+        <div class="timetable-section">
+          <div class="section-title">大阪方面 直通</div>
+          <div id="nishioji-osaka-direct"></div>
+        </div>
+        <div class="timetable-section">
+          <div class="section-title">京都駅経由</div>
+          <div id="nishioji-kyoto-connection"></div>
+        </div>
+      </div>
+    </div>
 
-        <section class="kyoto-timetable">
-            <h2>京都駅 (大阪方面) 時刻表</h2>
-            <p>(簡易データのため一部抜粋)</p>
-            <div id="kyotoOsakaTimetable">
-                </div>
-        </section>
+    <!-- 大阪 → 西大路 -->
+    <div class="route-section">
+      <div class="route-header">大阪駅 → 西大路駅</div>
+      <div class="timetable-container">
+        <div class="timetable-section">
+          <div class="section-title">西大路方面 直通</div>
+          <div id="osaka-nishioji-direct"></div>
+        </div>
+        <div class="timetable-section">
+          <div class="section-title">京都駅経由</div>
+          <div id="osaka-kyoto-connection"></div>
+        </div>
+      </div>
+    </div>
 
-        <section class="disclaimer">
-            <h3>※本アプリについてのご注意</h3>
-            <ul>
-                <li>このアプリは簡易デモ版であり、**ローカルに記述された限られたサンプルデータ**のみを使用しています。</li>
-                <li>JRおでかけネットからの**リアルタイムな時刻表取得は行っていません**。実際の運行情報とは異なる場合があります。</li>
-                <li>正確な運行情報は、JR公式の時刻表や案内をご参照ください。</li>
-                <li>実際の所要時間や乗り換え時間は、運行状況や個人の移動速度により変動します。</li>
-            </ul>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2025 JR時刻案内アプリ (簡易デモ)</p>
-    </footer>
+    <button class="refresh-btn" onclick="refreshTimetables()">🔄 更新</button>
+  </div>
 
-    <script src="script.js"></script>
+  <script>
+    /* ----------- サンプル時刻表データ（後日 JSON に置換可） ----------- */
+    const timetableData = { /* ここは質問に載せていただいたオブジェクトと同じ */ };
+
+    /* ----------- 日時関連ユーティリティ ----------- */
+    function updateCurrentTime(){
+      const now   = new Date();
+      const text  = now.toLocaleString('ja-JP',{
+        year:'numeric',month:'2-digit',day:'2-digit',
+        hour:'2-digit',minute:'2-digit',second:'2-digit',
+        weekday:'short'
+      });
+      document.getElementById('currentTime').textContent = `現在時刻: ${text}`;
+    }
+    function timeToMinutes(str){
+      const [h,m] = str.split(':').map(Number);
+      return h*60+m;
+    }
+
+    /* ----------- 直近列車抽出 ----------- */
+    function getNearbyTrains(list,currentMins,count=4){
+      const upcoming = list.filter(t=>timeToMinutes(t.time)>=currentMins);
+      const past     = list.filter(t=>timeToMinutes(t.time)< currentMins);
+      return upcoming.length>=count
+        ? upcoming.slice(0,count)
+        : [...past.slice(- (count-upcoming.length)),...upcoming];
+    }
+
+    /* ----------- 表示レンダリング ----------- */
+    function getTrainTypeClass(type){
+      if(type.includes('新快速')) return 'express';
+      if(type.includes('快速'))  return 'rapid';
+      return 'local';
+    }
+    function displayTimetable(elId,trains){
+      const el = document.getElementById(elId);
+      if(!trains.length){
+        el.innerHTML = '<div class="error">時刻表データがありません</div>';
+        return;
+      }
+      el.innerHTML = trains.map(t=>`
+        <div class="time-item">
+          <span class="time">${t.time}</span>
+          <span class="train-type ${getTrainTypeClass(t.type)}">${t.type}</span>
+        </div>
+      `).join('');
+    }
+
+    /* ----------- 乗換表示 ----------- */
+    function displayConnectionTimetable(elId,fromList,toList,transfer=2){
+      const nowMins  = timeToMinutes(new Date().toTimeString().slice(0,5));
+      const connections = [];
+
+      fromList.forEach(f=>{
+        const connTime = timeToMinutes(f.time)+transfer;
+        const to = toList.find(t=>timeToMinutes(t.time)>=connTime);
+        if(to){
+          connections.push({
+            /* ▼ 追加：getNearbyTrains が参照する time */
+            time        : f.time,
+            departure   : f.time,
+            arrival     : to.time,
+            depType     : f.type,
+            arrType     : to.type
+          });
+        }
+      });
+
+      const list = getNearbyTrains(connections,nowMins,4);
+      const el   = document.getElementById(elId);
+      el.innerHTML = list.map(c=>`
+        <div class="time-item">
+          <div>
+            <div class="time">${c.departure} → ${c.arrival}</div>
+            <small style="opacity:.7;">京都駅発 ${c.arrival}</small>
+          </div>
+          <span class="train-type ${getTrainTypeClass(c.arrType)}">${c.arrType}</span>
+        </div>
+      `).join('');
+    }
+
+    /* ----------- メイン更新処理 ----------- */
+    function refreshTimetables(){
+      const nowMins = timeToMinutes(new Date().toTimeString().slice(0,5));
+
+      displayTimetable('nishioji-osaka-direct',
+        getNearbyTrains(timetableData.nishiojiToOsaka,nowMins));
+
+      displayConnectionTimetable('nishioji-kyoto-connection',
+        timetableData.nishiojiToKyoto,timetableData.kyotoToOsaka);
+
+      displayTimetable('osaka-nishioji-direct',
+        getNearbyTrains(timetableData.osakaToNishioji,nowMins));
+
+      displayConnectionTimetable('osaka-kyoto-connection',
+        timetableData.osakaToKyoto,timetableData.kyotoToNishioji);
+    }
+
+    /* ----------- 初期化 ----------- */
+    function init(){
+      updateCurrentTime();
+      refreshTimetables();
+      /* 1 分ごとに自動更新 */
+      setInterval(()=>{ updateCurrentTime(); refreshTimetables(); },60000);
+    }
+    /* ページ読み込み時に実行 */
+    window.onload = init;
+  </script>
 </body>
 </html>
