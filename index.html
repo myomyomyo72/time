@@ -9,21 +9,40 @@
 <body>
     <header>
         <h1>JR時刻案内アプリ</h1>
+        <nav class="tabs">
+            <button class="tab active" data-tab="nishioji_osaka">西大路 → 大阪</button>
+            <button class="tab" data-tab="osaka_nishioji">大阪 → 西大路</button>
+        </nav>
     </header>
     <main>
-        <section class="controls">
-            <label for="direction">ルート選択:</label>
-            <select id="direction">
-                <option value="nishioji_osaka">西大路 → 大阪</option>
-                <option value="osaka_nishioji">大阪 → 西大路</option>
-            </select>
-            <button id="searchButton">検索</button>
+        <section id="nishioji_osaka" class="tab-content active">
+            <h2>西大路 → 大阪</h2>
+            <div id="nishioji_osaka_results">
+                <p>現在時刻から近い大阪方面の電車</p>
+                <div id="nishioji_osaka_direct_results">
+                    <h3>西大路から直通</h3>
+                    <ul class="train-list"></ul>
+                </div>
+                <div id="nishioji_osaka_via_kyoto_results">
+                    <h3>西大路 → 京都 (乗り換え) → 大阪</h3>
+                    <ul class="train-list"></ul>
+                </div>
+            </div>
         </section>
 
-        <section class="results">
-            <h2>最適なルート（現在時刻から近い列車）</h2>
-            <div id="resultsContent">
+        <section id="osaka_nishioji" class="tab-content">
+            <h2>大阪 → 西大路</h2>
+            <div id="osaka_nishioji_results">
+                <p>現在時刻から近い西大路方面の電車</p>
+                <div id="osaka_nishioji_direct_results">
+                    <h3>大阪から直通</h3>
+                    <ul class="train-list"></ul>
                 </div>
+                <div id="osaka_nishioji_via_kyoto_results">
+                    <h3>大阪 → 京都 (乗り換え) → 西大路</h3>
+                    <ul class="train-list"></ul>
+                </div>
+            </div>
         </section>
 
         <section class="kyoto-timetable">
