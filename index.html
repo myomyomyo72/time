@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JR時刻案内アプリ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>JR時刻案内アプリ</h1>
+    </header>
+    <main>
+        <section class="controls">
+            <label for="direction">ルート選択:</label>
+            <select id="direction">
+                <option value="nishioji_osaka">西大路 → 大阪</option>
+                <option value="osaka_nishioji">大阪 → 西大路</option>
+            </select>
+            <button id="searchButton">検索</button>
+        </section>
+
+        <section class="results">
+            <h2>最適なルート（現在時刻から近い列車）</h2>
+            <div id="resultsContent">
+                </div>
+        </section>
+
+        <section class="kyoto-timetable">
+            <h2>京都駅 (大阪方面) 時刻表</h2>
+            <p>(簡易データのため一部抜粋)</p>
+            <div id="kyotoOsakaTimetable">
+                </div>
+        </section>
+
+        <section class="disclaimer">
+            <h3>※本アプリについてのご注意</h3>
+            <ul>
+                <li>このアプリは簡易デモ版であり、**ローカルに記述された限られたサンプルデータ**のみを使用しています。</li>
+                <li>JRおでかけネットからの**リアルタイムな時刻表取得は行っていません**。実際の運行情報とは異なる場合があります。</li>
+                <li>正確な運行情報は、JR公式の時刻表や案内をご参照ください。</li>
+                <li>実際の所要時間や乗り換え時間は、運行状況や個人の移動速度により変動します。</li>
+            </ul>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 JR時刻案内アプリ (簡易デモ)</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
