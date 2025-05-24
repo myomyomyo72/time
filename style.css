@@ -13,6 +13,35 @@ header {
     padding: 1.5em 0;
     text-align: center;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.tabs {
+    display: flex;
+    margin-top: 1em;
+}
+
+.tab {
+    padding: 10px 15px;
+    border: none;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    border-radius: 5px 5px 0 0;
+    margin-right: 2px;
+    font-weight: bold;
+    color: #333;
+    transition: background-color 0.3s ease;
+}
+
+.tab.active {
+    background-color: #fff;
+    border-bottom: 2px solid #00796b; /* アクティブなタブの下線 */
+}
+
+.tab:hover {
+    background-color: #e0e0e0;
 }
 
 main {
@@ -22,6 +51,14 @@ main {
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
 }
 
 section {
@@ -141,4 +178,21 @@ footer {
     color: #777;
     font-size: 0.8em;
     border-top: 1px solid #eee;
+}
+
+.train-list {
+    list-style: none;
+    padding: 0;
+}
+
+.train-list li {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+}
+
+.train-list li strong {
+    font-weight: bold;
 }
